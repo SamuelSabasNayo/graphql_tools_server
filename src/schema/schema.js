@@ -7,27 +7,8 @@ import {
   GraphQLInt,
   GraphQLList
 } from 'graphql';
-
-// dummy data
-const booksData = [
-  { id: '1', name: 'Understanding Space. Introduction to Aeronautics', genre: 'Aerospace', authorId: '1' },
-  { id: '2', name: 'Introduction to Rocket Science & Engineering', genre: 'Rocketry', authorId: '2' },
-  { id: '3', name: 'Space Mission Engineering. The New SMAD', genre: 'Aerospace', authorId: '3' },
-  { id: '4', name: 'Introduction to the Space Environment', genre: 'Space Environment', authorId: '5' },
-  { id: '5', name: 'Rocket Propulsion Elements', genre: 'Rocketry', authorId: '4' },
-  { id: '6', name: 'Applied Space Systems Engineering (Space Technology)', genre: 'Space Systems', authorId: '1' },
-  { id: '7', name: 'Aerospace Science: The Exploration of Space with Cd', genre: 'Space Science', authorId: '1' },
-  { id: '8', name: 'One Day on Mars', genre: 'Space Environment', authorId: '2' },
-  { id: '9', name: 'Space Environmental Hazards: A Guide to Building Better Spacecraft', genre: 'Space Environment', authorId: '5' }
-];
-
-const authorsData = [
-  { id: '1', name: 'Jerry Jon Sellers', age: 45 },
-  { id: '2', name: 'Travis S. Taylor', age: 52 },
-  { id: '3', name: 'James R. Wertz', age: 47 },
-  { id: '4', name: 'George Paul Sutton', age: 61 },
-  { id: '5', name: 'Thomas F.Tascione', age: 55 },
-];
+import Author from '../models/author';
+import Book from '../models/book';
 
 const BookType = new GraphQLObjectType({
   name: 'Book',
@@ -38,7 +19,7 @@ const BookType = new GraphQLObjectType({
     author: {
       type: AuthorType,
       resolve(parent, args){
-        return _.find(authorsData, { id: parent.authorId })
+        // return _.find(authorsData, { id: parent.authorId })
       }
     }
   })
@@ -53,7 +34,7 @@ const AuthorType = new GraphQLObjectType({
     books: {
       type: new GraphQLList(BookType),
       resolve(parent, args){
-        return _.filter(booksData, { authorId: parent.id })
+        // return _.filter(booksData, { authorId: parent.id })
       }
     }
   })
@@ -67,31 +48,68 @@ const RootQuery = new GraphQLObjectType({
       args: { id: { type: GraphQLID } },
       resolve(parent, args){
         // code to get data from db / other source
-        return _.find(booksData, { id: args.id });
+        // return _.find(booksData, { id: args.id });
       }
     },
     author: {
       type: AuthorType,
       args: { id: { type: GraphQLID } },
       resolve(parent, args){
-        return _.find(authorsData, { id: args.id })
+        // return _.find(authorsData, { id: args.id })
       }
     },
     books: {
       type: new GraphQLList(BookType),
       resolve(parent, args){
-        return booksData
+        // return booksData
       }
     },
     authors: {
       type: new GraphQLList(AuthorType),
       resolve(parent, args){
-        return authorsData
+        // return authorsData
+      }
+    }
+  }
+});
+
+const Mutation = new GraphQLObjectType({
+  name: 'Mutation',
+  fields: {
+    addAuthor: {
+      type: AuthorType,
+      args: {
+        name: { type: GraphQLString },
+        age: { type: GraphQLInt }
+      },
+      resolve(parent, args) {
+        let author = new Author({
+          name: args.name,
+          age: args.age
+        });
+        return author.save();
+      }
+    },
+    addBook: {
+      type: BookType,
+      args: {
+        name: { type: GraphQLString },
+        genre: { type: GraphQLString },
+        authorId: { type: GraphQLID }
+      },
+      resolve(parent, args) {
+        let book = new Book({
+          name: args.name,
+          genre: args.genre,
+          authorId: args.authorId
+        });
+        return book.save();
       }
     }
   }
 });
 
 export default new GraphQLSchema({
-  query: RootQuery
+  query: RootQuery,
+  mutation: Mutation
 });
