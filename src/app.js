@@ -1,11 +1,14 @@
 import express from 'express';
 import mongoose, { Mongoose } from 'mongoose';
 import { graphqlHTTP } from 'express-graphql';
+import cors from 'cors';
 import config from './config/config';
 import schema from './schema/schema';
 
 // express app
 const app = express();
+
+app.use(cors());
 
 const { PORT, URL } = config;
 
@@ -15,6 +18,7 @@ mongoose.connect(URL, {
   useUnifiedTopology: true,
   useCreateIndex:true
 });
+
 
 mongoose.connection.on('connected', () => {
   console.log('Connected to mongoDB.');
